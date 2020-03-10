@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>BOWLINGSTAN</title>
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+	<link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+   	<link href="https://fonts.googleapis.com/css?family=Avenir" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="index.css">
+	<link rel="icon" href="ball2.ico" type="image/x-icon"/>
+	<link rel="shortcut icon" href="ball2.ico" type="image/x-icon"/>
+</head>
+<body>
+	<div id="btn">
+		<div class="ui grey inverted massive button">Play <strong>BOWLINGSTAN</strong> by <strong>Abhinav Tomar</strong></div>
+		<br>
+		<br>
+		<div class="ui buttons">
+			<h4 class="ui block left floated header">CONSOLE :  </h4>
+  			<button class="ui inverted red disabled button">For SMARTPHONES , use BUTTONS</button>
+  			<div class="or"></div>
+  			<button class="ui inverted blue  disabled button">For DESKTOP , use KEYBOARD</button>
+		</div>
+		<br>
+		<br>
+		<div class="ui buttons">
+			<h4 class="ui block left floated header">GAME Type: </h4>
+  			<button class="ui inverted orange button" onclick="gametype(1)">RAINING BALLS</button>
+  			<div class="or"></div>
+  			<button class="ui inverted yellow button" onclick="gametype(2)">Random generating BALLS</button>
+		</div>
+		<br>
+		<h4 class="ui red header">RAINING BALLS : Burst every "yellow" ball before it touches the ground but be sure not to touch "red" coloured balls..ENJOY..</h4>
+		<h4 class="ui red header">Random generating BALLS : Burst every "yellow" ball before it disappears but dont touch the "red" ones </h4>
+		<h4 class="ui animated teal	 button">
+			<div class="visible content">Hover to reveal HINT</div>
+			<div class="hidden content">Every 7th ball will be red</div>
+		</h4>
+		<br>
+		<br>
+		<div class="ui buttons">
+			<h4 class="ui block left floated header">Select MODE : hover for info</h4>
+  			<button class="ui animated fade in blue button" onclick="modeselect(1)">
+  					<div class="visible content">EASY MODE </div>
+  					<div class="hidden content">CUSTOM ACCELERATION</div>
+  			</button>
+  			<div class="or"></div>
+  			<button class="ui animated fade in teal button" onclick="modeselect(2)">
+  					<div class="visible content"> MEDIUM MODE </div>
+  					<div class="hidden content">HIGH SPEED</div>
+  			</button>
+  			<div class="or"></div>
+  			<button class="ui animated fade in green button" onclick="modeselect(3)">
+  					<div class="visible content">HARD MODE</div>
+  					<div class="hidden content">AUTOMATIC ACCELERATION</div>
+  			</button>
+		</div>
+		<br>
+		<br>
+		<button class="ui labeled icon inverted olive button">
+  			<i class="music icon"></i>
+  			Want to listen something , play this SONG
+		</button>
+		<br>
+		<br>
+		<audio src="intheend.mp3" preload="auto" controls="none"></audio>
+		<br>
+		<br>
+		<button onclick="startGame()" class="ui animated inverted black massive button" tabindex="0">
+		  <div class="visible content">Start GAME</div>
+		  <div class="hidden content">
+		    <i class="right arrow icon"></i>
+		  </div>
+		</button>
+		<br>
+		<br>
+	</div>
+	<div id="nav-btn">
+		<button class="ui green massive button" onmousedown="moveLeft()" onmouseup="stopMove()" ontouchstart="moveLeft()"><i class="ui left arrow icon"></i></button>
+		<button class="ui olive massive button" onmousedown="moveUp()" onmouseup="stopMove()" ontouchstart="moveUp()"><i class="ui up arrow icon"></i></button>
+		<button class="ui green massive button" onmousedown="moveRight()" onmouseup="stopMove()" ontouchstart="moveRight()"><i class="ui right arrow icon"></i></button>
+	</div>
+	<script type="text/javascript">
+		
+		var navbtn = document.getElementById('nav-btn');
+		var btn = document.getElementById('btn');
+		var myGamePiece;
+		var radius;
+		var radius1;
+		var mode = 10;
+		var myScoreCard;
+		var autoacceleration = true;
+		var myCircles = [];
+		var myScore;
+		var myObstacles = [];
+		var rainingballs = true;
+
+		function gametype(value) {
+			if(value == 1) {
+				rainingballs = true;
+			} else if(value == 2) {
+				rainingballs = false;
+			}
+		}
+
+		function modeselect(modevalue) {
+			if(modevalue == 1) {
+				mode = 20; 
+			} else if(modevalue == 2) {
+				mode = 10;
+			} else if(modevalue == 3) {
+				 mode = 5;
+				 autoacceleration = false;
+			}
+		}
+
+		function startGame() {
+			if(screen.width >= screen.height) {
+				radius = screen.width / 15;
+			} else {
+				radius = screen.width / 15;
+			}
+			radius1 = radius / 2;
+			btn.style.display = "none";
+			navbtn.style.display = "block";
+			
+			myGameArea.start();
+			myScoreCard = new component("100px", "Consolas", "blue", screen.width/8, screen.height/2, "text");
+			myGamePiece = new component(radius, 90, "teal", 200, 200, "circle");
+			myScore = new component("50px", "Consolas", "blue", 100, 100, "text");
+		}
+
+		var myGameArea = {
+			canvas: document.createElement("canvas"),
+			start: function(){
+				this.canvas.width = screen.width;
+				this.canvas.height = screen.height;
+				this.canvas.style.cursor = "none";
+				this.context = this.canvas.getContext("2d");
+				document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+				this.interval = setInterval(updateGameArea, mode);
+				this.frameNum = 0;
+
+				myGameArea.context.beginPath();
+					myGameArea.context.fillStyle = "red";
+					myGameArea.context.arc(100, 100, radius, 0, 2 * Math.PI);
+					myGameArea.context.fill();
+				window.addEventListener("keydown", function(event) {
+					myGameArea.keys = (myGameArea.keys || []);
+					myGameArea.keys[event.keyCode] = true;
+				});
+				window.addEventListener("keyup", function(event) {
+					myGameArea.keys[event.keyCode] = false;
+				});
+			},	
+			clear: function() {
+				this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+			},
+			stop: function() {
+				clearInterval(this.interval);
+			}
+
+		}
+
+		function component(width, height, color, x, y, type) {
+			this.type = type;
+			this.width = width;
+			this.height = height;
+			this.x = x;
+			this.y = y;
+			this.color = color; 
+			this.speedX = 0;
+			this.speedY = 0;
+			this.gravity = 0.05;
+			this.bounce = 0.6;
+			this.gravitySpeed = 0;
+			this.update = function() {
+				if(type == "circle") {
+					myGameArea.context.beginPath();
+					myGameArea.context.fillStyle = this.color;
+					myGameArea.context.arc(this.x, this.y, this.width, 0, 2 * Math.PI);
+					myGameArea.context.fill();
+				} else if(type == "text") {
+					myGameArea.context.font = this.width + " " + this.height;
+					myGameArea.context.fillStyle = this.color;
+					myGameArea.context.fillText(this.text, this.x, this.y);
+				}
+			}
+			this.newPos = function() {
+				this.gravitySpeed += this.gravity; 
+				checkx = this.x + this.speedX;
+				checky = this.y + this.speedY + this.gravitySpeed;
+				if(checkx < radius) {
+					return;
+				} else if( checkx > (myGameArea.canvas.width - radius)) {
+					return;
+				} else {
+					this.x = checkx;
+				}
+				if(checky < radius) {
+					myGamePiece.gravitySpeed = 0;
+					return;
+				} else if( checky > (myGameArea.canvas.height - radius)) {
+					myGamePiece.gravity = 0;
+					myGamePiece.gravitySpeed = -(this.gravitySpeed * this.bounce);
+					return;
+				} else {
+					this.y = checky;
+				}
+				
+			}
+		}
+
+		function updateGameArea() {
+			for(var i = 0; i < myCircles.length; i++) {
+				if(rainingballs) {
+					if(myCircles[i].y > (myGameArea.canvas.height - radius1)) {
+						myScoreCard.text = "Your " + myScore.text;
+						myScoreCard.update();
+						myGameArea.canvas.style.cursor = "pointer";
+						myGameArea.context.fillRect(this.x, this.y, this.width, this.height);
+						myGameArea.stop();
+						return;
+					}
+				} else {
+					if(myCircles[i].width < 0.5) {
+					myScoreCard.text = "Your " + myScore.text;
+					myScoreCard.update();
+					myGameArea.canvas.style.cursor = "pointer";
+					myGameArea.context.fillRect(this.x, this.y, this.width, this.height);
+					myGameArea.stop();
+					return;
+					}
+				}
+			}
+
+			for(var i = 0; i < myObstacles.length; i++) {
+				if(Math.sqrt(Math.pow((myObstacles[i].x - myGamePiece.x), 2) + Math.pow((myObstacles[i].y - myGamePiece.y), 2)) <= ( radius + radius1 )) {
+						myScoreCard.text = "Your " + myScore.text;
+						myScoreCard.update();
+						myGameArea.canvas.style.cursor = "pointer";
+						myGameArea.context.fillRect(this.x, this.y, this.width, this.height);
+						myGameArea.stop();
+						return;
+				}
+			}
+
+			myGameArea.clear();
+			myGameArea.frameNum += 1;
+			if(everyInterval(150) ) {
+				if(rainingballs) {
+					myCircles.push(new component(radius1, 0, "yellow", randomm(myGameArea.canvas.width), 0, "circle"));
+				} else {
+					myCircles.push(new component(radius1, 0, "yellow", randomm(myGameArea.canvas.width), randomm(myGameArea.canvas.height), "circle"));
+				}
+			}
+			if(everyInterval(1000)) {
+				if(rainingballs) {
+					myObstacles.push(new component(radius1, 0, "red", randomm(myGameArea.canvas.width), 0, "circle"));
+				} else {
+					myObstacles.push(new component(radius1, 0, "red", randomm(myGameArea.canvas.width), randomm(myGameArea.canvas.height), "circle"));
+				}
+			}
+
+			for(var i = 0; i < myCircles.length; i++) {
+
+				if(rainingballs) {
+					myCircles[i].y += 1;
+				} else if(myCircles[i].width > 0.5) {
+					myCircles[i].width -= 0.1; 
+				}
+				myCircles[i].update();
+			}
+			for(var i = 0; i < myObstacles.length; i++) {
+				myObstacles[i].y += 1;
+				myObstacles[i].update();
+			}
+			for(var i = 0; i < myCircles.length; i++) {
+				if(Math.sqrt(Math.pow((myCircles[i].x - myGamePiece.x), 2) + Math.pow((myCircles[i].y - myGamePiece.y), 2)) <= ( radius + radius1 )) {
+					myCircles.splice(i, 1);
+				}
+			}
+			for(var i = 0; i < myObstacles.length; i++) {
+				if(myObstacles[i].y > (myGameArea.canvas.height - radius1)) {
+					myObstacles.splice(i, 1);
+				}
+			}
+			
+			myScore.text = "Score : " + myGameArea.frameNum / 20; 
+			
+			if(myGameArea.keys && myGameArea.keys[38]) {myGamePiece.gravity = -0.5;}
+			if(myGameArea.keys && myGameArea.keys[40]) {myGamePiece.gravity = 0.1;}
+			if(myGameArea.keys && myGameArea.keys[37]) {myGamePiece.speedX = -5;}
+			if(myGameArea.keys && myGameArea.keys[39]) {myGamePiece.speedX = 5;}
+			myScore.update();
+			myGamePiece.newPos();
+			myGamePiece.update();
+			myGamePiece.gravity = 0.05;
+			if(autoacceleration) {
+				myGamePiece.speedY = 0;
+				myGamePiece.speedX = 0;
+			}
+			
+		}
+
+		function everyInterval(n) {
+			if((myGameArea.frameNum / n ) % 1 == 0 ) {return true;}
+			return false;
+		}
+
+		function colors() {
+			var r = Math.round(Math.random()*255);
+			var g = Math.round(Math.random()*255);
+			var b = Math.round(Math.random()*255);
+			return "rgb(" + r + ", " + g + ", " + b + ")";
+		}
+
+		function randomm(size) {
+			return Math.round(Math.random() * size);
+		}
+
+		function moveLeft() {
+			myGamePiece.speedX -= 100;
+		}
+		function moveUp() {
+			myGamePiece.gravity = -3;
+		}
+		function moveRight() {
+			myGamePiece.speedX += 100;
+		}
+		function stopMove() {
+			if(autoacceleration) {
+				myGamePiece.speedX = 0;
+				myGamePiece.speedY = 0;
+			}
+			
+		}
+
+	</script>
+	
+</body>
+</html>
